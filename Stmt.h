@@ -15,7 +15,7 @@ class Stmt {
 
 class Class: public Stmt {       
     Class(Token name,                     
-          Decl::Variable superclass,       
+          Expr::Variable superclass,       
           vector<Stmt::Function> methods) {  
       this.name = name;                   
       this.superclass = superclass;       

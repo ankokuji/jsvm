@@ -14,28 +14,26 @@ class Parser
 private:
   vector<Token> tokens;
   int current = 0;
-
-
   Stmt statement() {                  
     if (match({PRINT})) return printStatement();
 
     return expressionStatement();             
   }   
 
-  Decl::Expr expression()
+  Expr::Expr expression()
   {
     return equality();
   }
 
-  Decl::Expr equality()
+  Expr::Expr equality()
   {
-    Decl::Expr expr = comparison();
+    Expr::Expr expr = comparison();
 
     while (match({BANG_EQUAL, EQUAL_EQUAL}))
     {
       Token op = previous();
-      Decl::Expr right = comparison();
-      expr = Decl::Binary(expr, op, right);
+      Expr::Expr right = comparison();
+      expr = Expr::Binary(expr, op, right);
     }
 
     return expr;
@@ -59,43 +57,43 @@ private:
     return false;
   }
 
-  Decl::Expr comparison()
+  Expr::Expr comparison()
   {
-    Decl::Expr expr = addition();
+    Expr::Expr expr = addition();
 
     while (match({GREATER, GREATER_EQUAL, LESS, LESS_EQUAL}))
     {
       Token op = previous();
-      Decl::Expr right = addition();
-      expr = Decl::Binary(expr, op, right);
+      Expr::Expr right = addition();
+      expr = Expr::Binary(expr, op, right);
     }
 
     return expr;
   }
 
-  Decl::Expr addition()
+  Expr::Expr addition()
   {
-    Decl::Expr expr = multiplication();
+    Expr::Expr expr = multiplication();
 
     while (match({MINUS, PLUS}))
     {
       Token op = previous();
-      Decl::Expr right = multiplication();
-      expr = Decl::Binary(expr, op, right);
+      Expr::Expr right = multiplication();
+      expr = Expr::Binary(expr, op, right);
     }
 
     return expr;
   }
 
-  Decl::Expr multiplication()
+  Expr::Expr multiplication()
   {
-    Decl::Expr expr = unary();
+    Expr::Expr expr = unary();
 
     while (match({SLASH, STAR}))
     {
       Token op = previous();
-      Decl::Expr right = unary();
-      expr = Decl::Binary(expr, op, right);
+      Expr::Expr right = unary();
+      expr = Expr::Binary(expr, op, right);
     }
 
     return expr;
@@ -108,36 +106,36 @@ private:
     return peek()._type == type;
   }
 
-  Decl::Expr unary()
+  Expr::Expr unary()
   {
     if (match({BANG, MINUS}))
     {
       Token op = previous();
-      Decl::Expr right = unary();
-      return Decl::Unary(op, right);
+      Expr::Expr right = unary();
+      return Expr::Unary(op, right);
     }
     return primary();
   }
 
-  Decl::Expr primary()
+  Expr::Expr primary()
   {
     if (match({FALSE}))
-      return Decl::Literal(false);
+      return Expr::Literal(false);
     if (match({TRUE}))
-      return Decl::Literal(true);
+      return Expr::Literal(true);
     if (match({NIL}))
-      return Decl::Literal(NULL);
+      return Expr::Literal(NULL);
 
     if (match({NUMBER, STRING}))
     {
-      return Decl::Literal(previous()._literal);
+      return Expr::Literal(previous()._literal);
     }
 
     if (match({LEFT_PAREN}))
     {
-      Decl::Expr expr = expression();
+      Expr::Expr expr = expression();
       consume(RIGHT_PAREN, "Expect ')' after expression.");
-      return Decl::Grouping(expr);
+      return Expr::Grouping(expr);
     }
 
     throw error(peek(), "Expect expression.");
@@ -207,7 +205,7 @@ public:
     tokens = tokens;
   }
 
-  Decl::Expr parser()
+  Expr::Expr parser()
   {
     return expression();
   }

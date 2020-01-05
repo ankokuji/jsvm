@@ -7,15 +7,15 @@
 
 using std::list;
 
-class Interpreter : public Decl::Expr, public Stmt::Stmt
+class Interpreter : public Expr::Visitor, public Stmt::Visitor
 {
 public:
   void interprete(list<Stmt::Stmt> stmt)
   {
   }
 
-  void interprete(Decl::Expr expr) {
-    return expr.accept(this);
+  Value::Value interprete(Expr::Expr expr) {
+    return expr.accept(*this);
   }
 };
 

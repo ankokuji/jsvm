@@ -2,37 +2,46 @@
 #define AST_PRINTER
 
 #include "Expr.h"
+#include "Value.h"
 #include <string>
 
 using std::string;
 
-class AstPrinter : public Decl::Visitor<string>
+typedef Value::String *val_str_ptr;
+
+val_str_ptr fromString(string str) {
+  return Value::String::New(str);
+}
+
+class AstPrinter : public Expr::Visitor
 {
 public:
-  string visitBinaryExpr(Decl::Binary expr) override
+  val_str_ptr visitBinaryExpr(Expr::Binary expr) override
   {
-    return parenthesize(expr._op._lexeme, {expr._left, expr._right});
+    string str = parenthesize(expr._op._lexeme, {expr._left, expr._right});
+    return fromString(str);
   }
 
-  string visitGroupingExpr(Decl::Grouping expr) override
+  val_str_ptr visitGroupingExpr(Expr::Grouping expr) override
   {
-    return parenthesize("group", {expr._expression});
+    return fromString(parenthesize("group", {expr._expression}));
   }
 
   template <typename T>
-  string visitLiteralExpr(Decl::Literal<T> expr) override
+  val_str_ptr visitLiteralExpr(Expr::Literal<T> expr) override
   {
-    if (expr.value == NULL)
-      return "nil";
-    return expr.value.tostring();
+    if (expr._value == NULL)
+      return "null";
+    return expr._value;
   }
 
-  string visitUnaryExpr(Decl::Unary expr) override
+  val_str_ptr visitUnaryExpr(Expr::Unary expr) override
   {
-    return parenthesize(expr._op._lexeme, {expr._right});
+    return fromString(parenthesize(expr._op._lexeme, {expr._right}));
   }
 
-  string parenthesize(string name, vector<Decl::Expr> right)
+private:
+  string parenthesize(string name, vector<Expr::Expr> right)
   {
     // StringBuilder builder = new StringBuilder();
 

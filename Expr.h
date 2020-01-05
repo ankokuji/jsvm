@@ -3,33 +3,40 @@
 #define DECL_EXP
 
 #include "Lexer.h"
+#include "Value.h"
 #include <vector>
 
 using std::vector;
 
-namespace Decl
+namespace Expr
 {
 
-enum DeclType
+class Visitor;
+
+enum ExprType
 {
   BINARY,
   ASSIGN,
-  VARIABLE
+  VARIABLE,
+  GROUPING
 };
 
 class Expr
 {
+
+private:
   friend class Parser;
-  enum DeclType _type;
+  enum ExprType _type;
 
 protected:
-  Expr(DeclType type) : _type(type){};
+  Expr(ExprType type) : _type(type){};
 
 public:
-  DeclType getType()
+  ExprType getType()
   {
     return _type;
   }
+  virtual Value::Value accept(Visitor visitor);
 };
 
 class Binary : public Expr
@@ -39,12 +46,10 @@ public:
   Token _op;
   Expr _right;
 
-  Binary(Expr left, Token op, Expr right) : Expr(BINARY), _op(op){};
-
-  template <typename R>
-  R accept(Visitor<R> visitor) override
+  Binary(Expr left, Token op, Expr right) : Expr(BINARY), _op(op), _left(left), _right(right){};
+  Value::Value accept(Visitor visitor) override
   {
-    return visitor.visitAssignExpr(this);
+    return visitor.visitBinaryExpr(*this);
   }
 };
 
@@ -54,10 +59,9 @@ class Assign : public Expr
   Token _name;
   Expr _value;
 
-  template <typename R>
-  R accept(Visitor<R> visitor)
+  Value::Value accept(Visitor visitor) override
   {
-    return visitor.visitAssign(this);
+    return visitor.visitAssignExpr(*this);
   }
 };
 
@@ -74,7 +78,7 @@ class Call : public Expr
 class Grouping : public Expr
 {
 public:
-  Grouping(Expr expression) : _expression(expression) {}
+  Grouping(Expr expression) : Expr(GROUPING), _expression(expression) {}
   Expr _expression;
 };
 
@@ -110,31 +114,33 @@ class Variable : public Expr
 {
   Variable(Token name) : Expr(VARIABLE), _name(name){};
 
-  template <typename R>
-  R accept(Visitor<R> visitor)
+  Value::Value accept(Visitor visitor)
   {
-    return visitor.visitVariableExpr(this);
+    return visitor.visitVariableExpr(*this);
   }
 
   Token _name;
 };
 
-template <typename R>
+typedef valptr valptr;
+
 class Visitor
 {
-  virtual R visitAssignExpr(Assign expr);
-  virtual R visitBinaryExpr(Binary expr);
-  virtual R visitCallExpr(Call expr);
-  virtual R visitGetExpr(Get expr);
-  virtual R visitGroupingExpr(Grouping expr);
-  virtual R visitLiteralExpr(Literal expr);
-  virtual R visitLogicalExpr(Logical expr);
-  virtual R visitSetExpr(Set expr);
-  virtual R visitSuperExpr(Supevirtual r expr);
-  virtual R visitThisExpr(This expr);
-  virtual R visitUnaryExpr(Unary expr);
-  virtual R visitVariableExpr(Variable expr);
+public:
+  virtual valptr visitAssignExpr(Assign expr);
+  virtual valptr visitBinaryExpr(Binary expr);
+  virtual valptr visitCallExpr(Call expr);
+  virtual valptr visitGetExpr(Get expr);
+  virtual valptr visitGroupingExpr(Grouping expr);
+  virtual valptr visitLiteralExpr(Literal expr);
+  virtual valptr visitLogicalExpr(Logical expr);
+  virtual valptr visitSetExpr(Set expr);
+  virtual valptr visitSuperExpr(Supevirtual expr);
+  virtual valptr visitThisExpr(This expr);
+  virtual valptr visitUnaryExpr(Unary expr);
+  virtual valptr visitVariableExpr(Variable expr);
 };
+
 }; // namespace Decl
 
 #endif
