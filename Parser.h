@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include "Lexer.h"
 #include "Expr.h"
+#include "Stmt.h"
 
 using std::vector;
 
@@ -14,11 +15,10 @@ class Parser
 private:
   vector<Token> tokens;
   int current = 0;
-  Stmt statement() {                  
+  Stmt::Stmt statement() {                  
     if (match({PRINT})) return printStatement();
-
     return expressionStatement();             
-  }   
+  }
 
   Expr::Expr expression()
   {

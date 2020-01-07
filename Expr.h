@@ -23,19 +23,7 @@ enum ExprType
 
 class Expr
 {
-
-private:
-  friend class Parser;
-  enum ExprType _type;
-
-protected:
-  Expr(ExprType type) : _type(type){};
-
 public:
-  ExprType getType()
-  {
-    return _type;
-  }
   virtual Value::Value accept(Visitor visitor);
 };
 
@@ -46,7 +34,7 @@ public:
   Token _op;
   Expr _right;
 
-  Binary(Expr left, Token op, Expr right) : Expr(BINARY), _op(op), _left(left), _right(right){};
+  Binary(Expr left, Token op, Expr right) : _op(op), _left(left), _right(right){};
   Value::Value accept(Visitor visitor) override
   {
     return visitor.visitBinaryExpr(*this);
@@ -55,7 +43,7 @@ public:
 
 class Assign : public Expr
 {
-  Assign(Token name, Expr value) : Expr(ASSIGN), _name(name), _value(value) {}
+  Assign(Token name, Expr value) : _name(name), _value(value) {}
   Token _name;
   Expr _value;
 
@@ -78,7 +66,7 @@ class Call : public Expr
 class Grouping : public Expr
 {
 public:
-  Grouping(Expr expression) : Expr(GROUPING), _expression(expression) {}
+  Grouping(Expr expression): _expression(expression) {}
   Expr _expression;
 };
 
@@ -112,7 +100,7 @@ public:
 
 class Variable : public Expr
 {
-  Variable(Token name) : Expr(VARIABLE), _name(name){};
+  Variable(Token name): _name(name){};
 
   Value::Value accept(Visitor visitor)
   {
@@ -141,6 +129,6 @@ public:
   virtual valptr visitVariableExpr(Variable expr);
 };
 
-}; // namespace Decl
+}; // namespace Expr
 
 #endif
