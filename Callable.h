@@ -1,15 +1,18 @@
 #ifndef CALLABLE
 #define CALLABLE
 
-#include <list>
+#include <vector>
 #include "Value.h"
 #include "Interpreter.h"
+
+using std::vector;
 
 class Callable
 {
 public:
-  virtual Value::Value *call(Interpreter &interpreter, list<Value::Value *> arguments);
-  virtual int arity();
+  virtual Value::Value *Call(Interpreter &interpreter, vector<Value::Value *> arguments);
+  virtual int Arity();
+  virtual string ToString();
 };
 
 #endif

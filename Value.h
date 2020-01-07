@@ -2,10 +2,12 @@
 #define LOCAL_VALUE
 
 #include <string>
+#include "Function.h"
 
 using std::string;
 
 typedef int integer;
+typedef Function js_function;
 
 namespace Value
 {
@@ -16,6 +18,19 @@ class Value
     return false;
   };
 };
+
+class Function : public Value
+{
+public:
+  static Function *New(js_function &func)
+  {
+    return Function(func);
+  }
+
+private:
+  Function(js_function &func) : _val(func){};
+  js_function _val;
+}
 
 class Integer : public Value
 {
